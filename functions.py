@@ -11,12 +11,15 @@ import xgboost as xgb
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 import seaborn as sns
+import cvxpy as cp
+
 
 IMAGES_DIR = "images/"
 DATASET_DIR = "data/"
 TABLES_DIR = "tables/"
 TRAIN_DATASET = "train_242325.csv"
 FORECAST_DATASET = "forecast.csv"
+OPTIMISATION_DATASET = "optimisation.csv"
 
 # -------- PLOTTING STYLES
 PLOT_STYLE = dict(
@@ -51,13 +54,6 @@ ENERGY_COLORS = {
     "wind": "#70AD47",
     "price": "#A64D79",
 }
-
-FORECAST_FEATURES = [
-    "hour_sin", "hour_cos", "is_weekend", "cooling_degree", "heating_degree",
-    "temperature", "pressure (hPa)", "cloud_cover (%)", "wind_speed_10m (km/h)",
-    "shortwave_radiation (W/m²)", "direct_radiation (W/m²)",
-    "diffuse_radiation (W/m²)", "direct_normal_irradiance (W/m²)", "price"
-]
 
 def academic_style():
     """Apply consistent academic-style settings to matplotlib."""
@@ -109,6 +105,24 @@ def load_forecast_data():
                             'Wind_speed_10m (km/h)': 'wind_speed_10m (km/h)',
                             'Shortwave_radiation (W/m²)': 'shortwave_radiation (W/m²)'
                             })
+    return df
+
+def load_optimisation_data():
+    df = pd.read_csv(DATASET_DIR + OPTIMISATION_DATASET, parse_dates=['timestamp'], index_col='timestamp')
+    df = df.rename(columns={
+        'Price': 'price',
+        'Temperature': 'temperature',
+        'Pressure (hPa)': 'pressure (hPa)',
+        'Cloud_cover (%)': 'cloud_cover (%)',
+        'Cloud_cover_low (%)': 'cloud_cover_low (%)',
+        'Cloud_cover_mid (%)': 'cloud_cover_mid (%)',
+        'Cloud_cover_high (%)': 'cloud_cover_high (%)',
+        'Wind_speed_10m (km/h)': 'wind_speed_10m (km/h)',
+        'Shortwave_radiation (W/m²)': 'shortwave_radiation (W/m²)',
+        'direct_radiation (W/m²)': 'direct_radiation (W/m²)',
+        'diffuse_radiation (W/m²)': 'diffuse_radiation (W/m²)',
+        'direct_normal_irradiance (W/m²)': 'direct_normal_irradiance (W/m²)',
+    })
     return df
 
 def save_fig(fig, filename: str):
@@ -430,6 +444,7 @@ def plot_forecast(timestamp, y_true, y_pred, model_name="XGBoost", filename=None
     return fig
 
 
+
 def add_time_weather_features(df: pd.DataFrame) -> pd.DataFrame:
     """Feature engineering used for ML forecasting."""
     df = df.copy()
@@ -609,35 +624,167 @@ def metrics_by_model(df: pd.DataFrame) -> pd.DataFrame:
         rows.append(m)
     return pd.DataFrame(rows)[["model", "MAE", "RMSE", "nRMSE", "MAPE"]]
 
+def plot_optimisation_profile(hours, demand, pv, result, title_prefix="PV_low",
+                              filename=None):
+    """3-panel Plotly figure for optimisation results."""
 
-def split_7_consecutive_days(forecast_df: pd.DataFrame):
-    """Tagasta 7 päeva algus ja lõpp. Eeldab 7 järjestikust päeva tunnitarkusega."""
-    df = forecast_df.copy()
-    df["date"] = pd.to_datetime(df["timestamp"]).dt.normalize()
-    days = sorted(df["date"].unique().tolist())
-    ranges = []
-    for d in days:
-        start = pd.Timestamp(d)
-        end = start + pd.Timedelta(hours=23)
-        ranges.append((start, end))
-    return ranges
+    fig = make_subplots(
+        rows=3, cols=1,
+        shared_xaxes=True,
+        vertical_spacing=0.08,
+        subplot_titles=[
+            f"{title_prefix} – Demand and PV",
+            f"{title_prefix} – Grid and battery power",
+            f"{title_prefix} – Battery state of charge"
+        ]
+    )
+
+    # Demand + PV
+    fig.add_trace(go.Scatter(
+        x=hours, y=demand, mode="lines",
+        name="Demand forecast",
+        line=dict(width=2, color="black")
+    ), row=1, col=1)
+
+    fig.add_trace(go.Scatter(
+        x=hours, y=pv, mode="lines",
+        name=title_prefix,
+        line=dict(width=2, dash="dash", color="orange")
+    ), row=1, col=1)
+
+    fig.update_yaxes(title_text="Power [kW]", row=1, col=1)
+
+    # Grid + Charge/Discharge
+    fig.add_trace(go.Scatter(
+        x=hours, y=result["grid_import"], mode="lines",
+        name="Grid import", line=dict(width=1.5, color="blue")
+    ), row=2, col=1)
+
+    fig.add_trace(go.Scatter(
+        x=hours, y=result["grid_export"], mode="lines",
+        name="Grid export", line=dict(width=1.5, color="green")
+    ), row=2, col=1)
+
+    fig.add_trace(go.Scatter(
+        x=hours, y=result["charge"], mode="lines",
+        name="Charge", line=dict(width=1.5, dash="dash", color="orange")
+    ), row=2, col=1)
+
+    fig.add_trace(go.Scatter(
+        x=hours, y=result["discharge"], mode="lines",
+        name="Discharge", line=dict(width=1.5, dash="dash", color="red")
+    ), row=2, col=1)
+
+    fig.update_yaxes(title_text="Power [kW]", row=2, col=1)
+    # SOC
+    fig.add_trace(go.Scatter(
+        x=hours, y=result["soc"][:-1], mode="lines",
+        name="SOC", line=dict(width=2, color="purple")
+    ), row=3, col=1)
+
+    fig.update_layout(
+        height=900,
+        title=f"Battery optimisation profile – {title_prefix}",
+        **PLOT_STYLE
+    )
+    fig.update_yaxes(title_text="Energy [kWh]", row=3, col=1)
+    fig.update_xaxes(title_text="Hour", row=3, col=1)
+
+    if filename:
+        save_fig_plotly(fig, filename, width=1100, height=900)
+
+    return fig
+
+def compute_optimisation_summary(result_low, result_high, batt_cap=10.0):
+    """Returns summary DataFrame for PV_low vs PV_high optimisation."""
+
+    def extract(res):
+        energy_bought = np.sum(res["grid_import"])
+        energy_sold = np.sum(res["grid_export"])
+        throughput = np.sum(res["discharge"])
+        cycles = throughput / batt_cap  # use local input
+        return {
+            "Total cost [€]": res["cost"],
+            "Energy bought (kWh)": energy_bought,
+            "Energy sold (kWh)": energy_sold,
+            "Battery cycles": cycles,
+            "SOC min": np.min(res["soc"]),
+            "SOC max": np.max(res["soc"]),
+        }
+
+    summary = pd.DataFrame([
+        {"Scenario": "PV_low",  **extract(result_low)},
+        {"Scenario": "PV_high", **extract(result_high)},
+    ])
+
+    return summary.round(3)
 
 
-def baseline_naive(last_value: float, horizon_index: pd.DatetimeIndex) -> pd.Series:
-    """Naive: prognoos on viimane täheldatud väärtus enne horisonti."""
-    return pd.Series(np.repeat(float(last_value), len(horizon_index)), index=horizon_index)
+def optimize_storage(demand, pv, price_buy, price_sell,
+                     batt_cap=10.0, batt_power=5.0,
+                     grid_limit=5.0, eta=0.95):
+    """Battery optimisation for a 24h horizon."""
 
+    T = len(demand)
 
-def baseline_seasonal_naive(history: pd.Series, horizon_index: pd.DatetimeIndex) -> pd.Series:
-    """Seasonal naive: väärtus t-24 kui olemas, muidu viimane väärtus enne horisonti."""
-    res = []
-    last_val = float(history.iloc[-1])
-    hist = history.copy()
-    hist.index = pd.to_datetime(hist.index)
-    for ts in horizon_index:
-        t_prev = ts - pd.Timedelta(hours=24)
-        if t_prev in hist.index:
-            res.append(float(hist.loc[t_prev]))
-        else:
-            res.append(last_val)
-    return pd.Series(res, index=horizon_index)
+    soc = cp.Variable(T + 1)
+    charge = cp.Variable(T)
+    discharge = cp.Variable(T)
+    grid_import = cp.Variable(T)
+    grid_export = cp.Variable(T)
+
+    # Cost function (correct elementwise multiply)
+    cost = cp.sum(
+        cp.multiply(price_buy, grid_import) -
+        cp.multiply(price_sell, grid_export)
+    )
+
+    constraints = [
+        soc[0] == 0.5 * batt_cap,
+        soc[T] >= 0.2 * batt_cap,
+    ]
+
+    for t in range(T):
+
+        constraints += [
+            soc[t+1] == soc[t] + eta * charge[t] - discharge[t] / eta,
+            soc[t+1] >= 0,
+            soc[t+1] <= batt_cap,
+
+            charge[t] >= 0,
+            charge[t] <= batt_power,
+
+            discharge[t] >= 0,
+            discharge[t] <= batt_power,
+
+            grid_import[t] >= 0,
+            grid_import[t] <= grid_limit,
+
+            grid_export[t] >= 0,
+            grid_export[t] <= grid_limit,
+
+            pv[t] + grid_import[t] + discharge[t] ==
+            demand[t] + grid_export[t] + charge[t]
+        ]
+
+    problem = cp.Problem(cp.Minimize(cost), constraints)
+
+    # Solver fallback
+    try:
+        problem.solve(solver=cp.ECOS, verbose=False)
+    except:
+        problem.solve(solver=cp.SCS, verbose=False)
+
+    if problem.status not in ["optimal", "optimal_inaccurate"]:
+        raise RuntimeError(f"Optimisation failed: {problem.status}")
+
+    return {
+        "soc": soc.value,
+        "charge": charge.value,
+        "discharge": discharge.value,
+        "grid_import": grid_import.value,
+        "grid_export": grid_export.value,
+        "cost": problem.value,
+        "status": problem.status,
+    }
+

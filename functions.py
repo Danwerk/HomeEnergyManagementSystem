@@ -429,21 +429,185 @@ def plot_forecast(timestamp, y_true, y_pred, model_name="XGBoost", filename=None
         save_fig_plotly(fig, filename, width=1000, height=500)
     return fig
 
-def add_time_related_features(df):
+
+def add_time_weather_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Feature engineering used for ML forecasting."""
     df = df.copy()
-    if "timestamp" in df.columns:
-        ts = pd.to_datetime(df["timestamp"])
-    else:
-        ts = pd.to_datetime(df.index)
-        df = df.reset_index().rename(columns={"index": "timestamp"})
-    df["hour"] = ts.dt.hour
-    df["weekday"] = ts.dt.dayofweek
+    df["hour"] = df["timestamp"].dt.hour
+    df["weekday"] = df["timestamp"].dt.dayofweek
     df["is_weekend"] = (df["weekday"] >= 5).astype(int)
+
     df["hour_sin"] = np.sin(2 * np.pi * df["hour"] / 24)
     df["hour_cos"] = np.cos(2 * np.pi * df["hour"] / 24)
+
     df["cooling_degree"] = np.clip(df["temperature"] - 18, 0, None)
     df["heating_degree"] = np.clip(18 - df["temperature"], 0, None)
+
     return df
+
+
+def rolling_forecast_sarima(train_df, future_df,
+                            order=(1,1,1), seasonal=(1,1,1,24),
+                            days=7, horizon=24):
+    """Daily rolling forecast using SARIMA."""
+    results = []
+    history = train_df.copy()
+
+    start_forecast = future_df["timestamp"].min()
+
+    for d in range(days):
+        day_start = start_forecast + pd.Timedelta(days=d)
+        day_end = day_start + pd.Timedelta(hours=horizon - 1)
+        mask = (future_df["timestamp"] >= day_start) & (future_df["timestamp"] <= day_end)
+        day_data = future_df.loc[mask].copy()
+
+        if day_data.empty:
+            break
+
+        series = history.set_index("timestamp")["demand"]
+
+        fitted = fit_arima(series, order, seasonal)
+        if fitted is None:
+            continue
+
+        fc = forecast_arima(fitted, horizon=len(day_data), index=day_data["timestamp"])
+
+        df_day = pd.DataFrame({
+            "timestamp": day_data["timestamp"],
+            "y_true": day_data["demand"].values,
+            "y_pred": fc.values,
+            "model": f"SARIMA{order}{seasonal}",
+            "day": d + 1,
+        })
+        results.append(df_day)
+
+        history = pd.concat([history, day_data[history.columns]], ignore_index=True)
+
+    return pd.concat(results, ignore_index=True)
+
+
+def rolling_forecast_xgboost(train_df, future_df,
+                             days=7, horizon=24):
+    """Daily rolling forecast using XGBoost."""
+    results = []
+    history = train_df.copy()
+    start_forecast = future_df["timestamp"].min()
+
+    for d in range(days):
+        day_start = start_forecast + pd.Timedelta(days=d)
+        day_end = day_start + pd.Timedelta(hours=horizon - 1)
+        mask = (future_df["timestamp"] >= day_start) & (future_df["timestamp"] <= day_end)
+        day_data = future_df.loc[mask].copy()
+
+        if day_data.empty:
+            break
+
+        X_train = history.drop(columns=["timestamp", "demand"])
+        y_train = history["demand"]
+
+        X_day = day_data.drop(columns=["timestamp", "demand"])
+        y_day = day_data["demand"]
+
+        model, _ = train_xgboost(X_train, y_train)
+        y_pred = model.predict(X_day)
+
+        df_day = pd.DataFrame({
+            "timestamp": day_data["timestamp"],
+            "y_true": y_day.values,
+            "y_pred": y_pred,
+            "model": "XGBoost",
+            "day": d + 1,
+        })
+        results.append(df_day)
+
+        history = pd.concat([history, day_data[history.columns]], ignore_index=True)
+
+    return pd.concat(results, ignore_index=True)
+
+
+def rolling_forecast_naive(train_df, future_df,
+                           days=7, horizon=24):
+    """Baseline: last observed value."""
+    results = []
+    history = train_df.copy().sort_values("timestamp")
+    last_value = history["demand"].iloc[-1]
+
+    start = future_df["timestamp"].min()
+
+    for d in range(days):
+        day_start = start + pd.Timedelta(days=d)
+        day_end = day_start + pd.Timedelta(hours=horizon - 1)
+        mask = (future_df["timestamp"] >= day_start) & (future_df["timestamp"] <= day_end)
+        day_data = future_df.loc[mask].copy()
+
+        if day_data.empty:
+            break
+
+        y_pred = np.full(len(day_data), last_value)
+
+        df_day = pd.DataFrame({
+            "timestamp": day_data["timestamp"],
+            "y_true": day_data["demand"].values,
+            "y_pred": y_pred,
+            "model": "Naive (last value)",
+            "day": d + 1,
+        })
+        results.append(df_day)
+
+        last_value = day_data["demand"].iloc[-1]
+        history = pd.concat([history, day_data[history.columns]], ignore_index=True)
+
+    return pd.concat(results, ignore_index=True)
+
+
+def rolling_forecast_seasonal_naive(train_df, future_df,
+                                    days=7, horizon=24, lag=24):
+    """Seasonal naive baseline: value from 24h ago."""
+    results = []
+    history = train_df.copy().sort_values("timestamp").set_index("timestamp")
+
+    start = future_df["timestamp"].min()
+
+    for d in range(days):
+        day_start = start + pd.Timedelta(days=d)
+        day_end = day_start + pd.Timedelta(hours=horizon - 1)
+        mask = (future_df["timestamp"] >= day_start) & (future_df["timestamp"] <= day_end)
+        day_data = future_df.loc[mask].copy()
+
+        if day_data.empty:
+            break
+
+        preds = []
+        for ts in day_data["timestamp"]:
+            t_lag = ts - pd.Timedelta(hours=lag)
+            if t_lag in history.index:
+                preds.append(history.loc[t_lag, "demand"])
+            else:
+                preds.append(history["demand"].iloc[-1])
+
+        df_day = pd.DataFrame({
+            "timestamp": day_data["timestamp"],
+            "y_true": day_data["demand"].values,
+            "y_pred": np.array(preds),
+            "model": "Seasonal naive (24h)",
+            "day": d + 1,
+        })
+        results.append(df_day)
+
+        history = pd.concat([history,
+                             day_data.set_index("timestamp")[["demand"]]], axis=0)
+
+    return pd.concat(results, ignore_index=True)
+
+
+def metrics_by_model(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute performance metrics for each model."""
+    rows = []
+    for model, group in df.groupby("model"):
+        m = evaluate_forecast(group["y_true"], group["y_pred"])
+        m["model"] = model
+        rows.append(m)
+    return pd.DataFrame(rows)[["model", "MAE", "RMSE", "nRMSE", "MAPE"]]
 
 
 def split_7_consecutive_days(forecast_df: pd.DataFrame):
@@ -477,100 +641,3 @@ def baseline_seasonal_naive(history: pd.Series, horizon_index: pd.DatetimeIndex)
         else:
             res.append(last_val)
     return pd.Series(res, index=horizon_index)
-
-
-def rolling_forecast_7days(
-    train_full_df,
-    forecast_df,
-    feature_cols,
-    target: str = "demand",
-    arima_order=(2, 1, 2),
-    seasonal_order=(1, 1, 1, 24),
-    xgb_params: dict = None,
-):
-    if feature_cols is None:
-        feature_cols = FORECAST_FEATURES
-
-    trn = add_time_related_features(train_full_df.reset_index() if "timestamp" not in train_full_df.columns else train_full_df)
-    trn = trn.sort_values("timestamp")
-    trn_X_all = trn[feature_cols].astype(float)
-    trn_y_all = trn[target].astype(float)
-
-    days = split_7_consecutive_days(forecast_df)
-    all_rows = []
-    metric_rows = []
-
-    for day_idx, (start, end) in enumerate(days, 1):
-        # treening andmed kuni eelmise tunni lõpuni
-        cutoff = start - pd.Timedelta(hours=1)
-        train_slice = trn[trn["timestamp"] <= cutoff].copy()
-        if train_slice.empty:
-            continue
-
-        mask = (forecast_df["timestamp"] >= start) & (forecast_df["timestamp"] <= end)
-        fc_day = forecast_df.loc[mask].copy()
-        horizon_index = pd.to_datetime(fc_day["timestamp"])
-        y_true = fc_day[target].values.astype(float)
-
-        # SARIMA
-        y_hist = train_slice.set_index("timestamp")[target].astype(float)
-        sarima_fit = fit_arima(y_hist, order=arima_order, seasonal_order=seasonal_order)
-        if sarima_fit is not None:
-            sarima_pred = forecast_arima(sarima_fit, len(horizon_index), horizon_index).values
-            m = evaluate_forecast(y_true, sarima_pred)
-            metric_rows.append({"day_idx": day_idx, "model_name": "BestStat", **m})
-            all_rows.append(pd.DataFrame({
-                "timestamp": horizon_index, "model_name": "BestStat",
-                "y_true": y_true, "y_pred": sarima_pred, "day_idx": day_idx
-            }))
-
-        # XGBoost
-        X_train = train_slice[feature_cols].astype(float)
-        y_train = train_slice[target].astype(float)
-        X_test = fc_day[feature_cols].astype(float)
-        xgb_model, _ = train_xgboost(X_train, y_train, params=xgb_params or {})
-        xgb_pred = xgb_model.predict(X_test)
-        m = evaluate_forecast(y_true, xgb_pred)
-        metric_rows.append({"day_idx": day_idx, "model_name": "XGBoost", **m})
-        all_rows.append(pd.DataFrame({
-            "timestamp": horizon_index, "model_name": "XGBoost",
-            "y_true": y_true, "y_pred": xgb_pred, "day_idx": day_idx
-        }))
-
-        # Naive
-        naive_pred = baseline_naive(y_hist.iloc[-1], horizon_index)
-        m = evaluate_forecast(y_true, naive_pred.values)
-        metric_rows.append({"day_idx": day_idx, "model_name": "Naive", **m})
-        all_rows.append(pd.DataFrame({
-            "timestamp": horizon_index, "model_name": "Naive",
-            "y_true": y_true, "y_pred": naive_pred.values, "day_idx": day_idx
-        }))
-
-        # Seasonal naive
-        seas_pred = baseline_seasonal_naive(y_hist, horizon_index)
-        m = evaluate_forecast(y_true, seas_pred.values)
-        metric_rows.append({"day_idx": day_idx, "model_name": "SeasonalNaive", **m})
-        all_rows.append(pd.DataFrame({
-            "timestamp": horizon_index, "model_name": "SeasonalNaive",
-            "y_true": y_true, "y_pred": seas_pred.values, "day_idx": day_idx
-        }))
-
-    predictions_df = pd.concat(all_rows, ignore_index=True) if all_rows else pd.DataFrame()
-    metrics_by_day_df = pd.DataFrame(metric_rows) if metric_rows else pd.DataFrame()
-
-    if not metrics_by_day_df.empty:
-        metrics_summary_df = (
-            metrics_by_day_df
-            .groupby("model_name")[["MAE", "RMSE", "nRMSE"]]
-            .agg(MAE_mean=("MAE", "mean"),
-                 MAE_std=("MAE", "std"),
-                 RMSE_mean=("RMSE", "mean"),
-                 RMSE_std=("RMSE", "std"),
-                 nRMSE_mean=("nRMSE", "mean"),
-                 nRMSE_std=("nRMSE", "std"))
-            .reset_index()
-        )
-    else:
-        metrics_summary_df = pd.DataFrame()
-
-    return predictions_df, metrics_by_day_df, metrics_summary_df

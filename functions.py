@@ -52,6 +52,13 @@ ENERGY_COLORS = {
     "price": "#A64D79",
 }
 
+FORECAST_FEATURES = [
+    "hour_sin", "hour_cos", "is_weekend", "cooling_degree", "heating_degree",
+    "temperature", "pressure (hPa)", "cloud_cover (%)", "wind_speed_10m (km/h)",
+    "shortwave_radiation (W/m²)", "direct_radiation (W/m²)",
+    "diffuse_radiation (W/m²)", "direct_normal_irradiance (W/m²)", "price"
+]
+
 def academic_style():
     """Apply consistent academic-style settings to matplotlib."""
     mpl.rcParams.update({
@@ -422,3 +429,148 @@ def plot_forecast(timestamp, y_true, y_pred, model_name="XGBoost", filename=None
         save_fig_plotly(fig, filename, width=1000, height=500)
     return fig
 
+def add_time_related_features(df):
+    df = df.copy()
+    if "timestamp" in df.columns:
+        ts = pd.to_datetime(df["timestamp"])
+    else:
+        ts = pd.to_datetime(df.index)
+        df = df.reset_index().rename(columns={"index": "timestamp"})
+    df["hour"] = ts.dt.hour
+    df["weekday"] = ts.dt.dayofweek
+    df["is_weekend"] = (df["weekday"] >= 5).astype(int)
+    df["hour_sin"] = np.sin(2 * np.pi * df["hour"] / 24)
+    df["hour_cos"] = np.cos(2 * np.pi * df["hour"] / 24)
+    df["cooling_degree"] = np.clip(df["temperature"] - 18, 0, None)
+    df["heating_degree"] = np.clip(18 - df["temperature"], 0, None)
+    return df
+
+
+def split_7_consecutive_days(forecast_df: pd.DataFrame):
+    """Tagasta 7 päeva algus ja lõpp. Eeldab 7 järjestikust päeva tunnitarkusega."""
+    df = forecast_df.copy()
+    df["date"] = pd.to_datetime(df["timestamp"]).dt.normalize()
+    days = sorted(df["date"].unique().tolist())
+    ranges = []
+    for d in days:
+        start = pd.Timestamp(d)
+        end = start + pd.Timedelta(hours=23)
+        ranges.append((start, end))
+    return ranges
+
+
+def baseline_naive(last_value: float, horizon_index: pd.DatetimeIndex) -> pd.Series:
+    """Naive: prognoos on viimane täheldatud väärtus enne horisonti."""
+    return pd.Series(np.repeat(float(last_value), len(horizon_index)), index=horizon_index)
+
+
+def baseline_seasonal_naive(history: pd.Series, horizon_index: pd.DatetimeIndex) -> pd.Series:
+    """Seasonal naive: väärtus t-24 kui olemas, muidu viimane väärtus enne horisonti."""
+    res = []
+    last_val = float(history.iloc[-1])
+    hist = history.copy()
+    hist.index = pd.to_datetime(hist.index)
+    for ts in horizon_index:
+        t_prev = ts - pd.Timedelta(hours=24)
+        if t_prev in hist.index:
+            res.append(float(hist.loc[t_prev]))
+        else:
+            res.append(last_val)
+    return pd.Series(res, index=horizon_index)
+
+
+def rolling_forecast_7days(
+    train_full_df,
+    forecast_df,
+    feature_cols,
+    target: str = "demand",
+    arima_order=(2, 1, 2),
+    seasonal_order=(1, 1, 1, 24),
+    xgb_params: dict = None,
+):
+    if feature_cols is None:
+        feature_cols = FORECAST_FEATURES
+
+    trn = add_time_related_features(train_full_df.reset_index() if "timestamp" not in train_full_df.columns else train_full_df)
+    trn = trn.sort_values("timestamp")
+    trn_X_all = trn[feature_cols].astype(float)
+    trn_y_all = trn[target].astype(float)
+
+    days = split_7_consecutive_days(forecast_df)
+    all_rows = []
+    metric_rows = []
+
+    for day_idx, (start, end) in enumerate(days, 1):
+        # treening andmed kuni eelmise tunni lõpuni
+        cutoff = start - pd.Timedelta(hours=1)
+        train_slice = trn[trn["timestamp"] <= cutoff].copy()
+        if train_slice.empty:
+            continue
+
+        mask = (forecast_df["timestamp"] >= start) & (forecast_df["timestamp"] <= end)
+        fc_day = forecast_df.loc[mask].copy()
+        horizon_index = pd.to_datetime(fc_day["timestamp"])
+        y_true = fc_day[target].values.astype(float)
+
+        # SARIMA
+        y_hist = train_slice.set_index("timestamp")[target].astype(float)
+        sarima_fit = fit_arima(y_hist, order=arima_order, seasonal_order=seasonal_order)
+        if sarima_fit is not None:
+            sarima_pred = forecast_arima(sarima_fit, len(horizon_index), horizon_index).values
+            m = evaluate_forecast(y_true, sarima_pred)
+            metric_rows.append({"day_idx": day_idx, "model_name": "BestStat", **m})
+            all_rows.append(pd.DataFrame({
+                "timestamp": horizon_index, "model_name": "BestStat",
+                "y_true": y_true, "y_pred": sarima_pred, "day_idx": day_idx
+            }))
+
+        # XGBoost
+        X_train = train_slice[feature_cols].astype(float)
+        y_train = train_slice[target].astype(float)
+        X_test = fc_day[feature_cols].astype(float)
+        xgb_model, _ = train_xgboost(X_train, y_train, params=xgb_params or {})
+        xgb_pred = xgb_model.predict(X_test)
+        m = evaluate_forecast(y_true, xgb_pred)
+        metric_rows.append({"day_idx": day_idx, "model_name": "XGBoost", **m})
+        all_rows.append(pd.DataFrame({
+            "timestamp": horizon_index, "model_name": "XGBoost",
+            "y_true": y_true, "y_pred": xgb_pred, "day_idx": day_idx
+        }))
+
+        # Naive
+        naive_pred = baseline_naive(y_hist.iloc[-1], horizon_index)
+        m = evaluate_forecast(y_true, naive_pred.values)
+        metric_rows.append({"day_idx": day_idx, "model_name": "Naive", **m})
+        all_rows.append(pd.DataFrame({
+            "timestamp": horizon_index, "model_name": "Naive",
+            "y_true": y_true, "y_pred": naive_pred.values, "day_idx": day_idx
+        }))
+
+        # Seasonal naive
+        seas_pred = baseline_seasonal_naive(y_hist, horizon_index)
+        m = evaluate_forecast(y_true, seas_pred.values)
+        metric_rows.append({"day_idx": day_idx, "model_name": "SeasonalNaive", **m})
+        all_rows.append(pd.DataFrame({
+            "timestamp": horizon_index, "model_name": "SeasonalNaive",
+            "y_true": y_true, "y_pred": seas_pred.values, "day_idx": day_idx
+        }))
+
+    predictions_df = pd.concat(all_rows, ignore_index=True) if all_rows else pd.DataFrame()
+    metrics_by_day_df = pd.DataFrame(metric_rows) if metric_rows else pd.DataFrame()
+
+    if not metrics_by_day_df.empty:
+        metrics_summary_df = (
+            metrics_by_day_df
+            .groupby("model_name")[["MAE", "RMSE", "nRMSE"]]
+            .agg(MAE_mean=("MAE", "mean"),
+                 MAE_std=("MAE", "std"),
+                 RMSE_mean=("RMSE", "mean"),
+                 RMSE_std=("RMSE", "std"),
+                 nRMSE_mean=("nRMSE", "mean"),
+                 nRMSE_std=("nRMSE", "std"))
+            .reset_index()
+        )
+    else:
+        metrics_summary_df = pd.DataFrame()
+
+    return predictions_df, metrics_by_day_df, metrics_summary_df

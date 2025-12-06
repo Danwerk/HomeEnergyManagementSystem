@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2025-11-11T18:42:55.573819</dc:date>
+    <dc:date>2025-12-06T17:39:22.044589</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -21,10 +21,10 @@
  </defs>
  <g id="figure_1">
   <g id="patch_1">
-   <path d="M -0 276.157344 
+   <path d="M 0 276.157344 
 L 707.718011 276.157344 
 L 707.718011 0 
-L -0 0 
+L 0 0 
 z
 " style="fill: #ffffff"/>
   </g>
@@ -42,7 +42,7 @@ z
      <g id="line2d_1">
       <path d="M 64.868404 237.066875 
 L 64.868404 26.226875 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_1">
       <!-- 2013-07-01 -->
@@ -193,7 +193,7 @@ z
      <g id="line2d_2">
       <path d="M 165.765167 237.066875 
 L 165.765167 26.226875 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_2">
       <!-- 2013-07-02 -->
@@ -215,7 +215,7 @@ L 165.765167 26.226875
      <g id="line2d_3">
       <path d="M 266.66193 237.066875 
 L 266.66193 26.226875 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_3">
       <!-- 2013-07-03 -->
@@ -237,7 +237,7 @@ L 266.66193 26.226875
      <g id="line2d_4">
       <path d="M 367.558693 237.066875 
 L 367.558693 26.226875 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_4">
       <!-- 2013-07-04 -->
@@ -280,7 +280,7 @@ z
      <g id="line2d_5">
       <path d="M 468.455456 237.066875 
 L 468.455456 26.226875 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_5">
       <!-- 2013-07-05 -->
@@ -330,7 +330,7 @@ z
      <g id="line2d_6">
       <path d="M 569.352219 237.066875 
 L 569.352219 26.226875 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_6">
       <!-- 2013-07-06 -->
@@ -386,7 +386,7 @@ z
      <g id="line2d_7">
       <path d="M 670.248982 237.066875 
 L 670.248982 26.226875 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_7">
       <!-- 2013-07-07 -->
@@ -405,8 +405,8 @@ L 670.248982 26.226875
      </g>
     </g>
     <g id="text_8">
-     <!-- Time -->
-     <g style="fill: #262626" transform="translate(355.106818 266.390469) scale(0.12 -0.12)">
+     <!-- Time (h) -->
+     <g style="fill: #262626" transform="translate(346.611193 266.390469) scale(0.12 -0.12)">
       <defs>
        <path id="TimesNewRomanPSMT-54" d="M 3703 4238 
 L 3750 3244 
@@ -556,11 +556,94 @@ Q 1125 2728 920 2526
 Q 716 2325 681 1966 
 z
 " transform="scale(0.015625)"/>
+       <path id="TimesNewRomanPSMT-20" transform="scale(0.015625)"/>
+       <path id="TimesNewRomanPSMT-28" d="M 1988 -1253 
+L 1988 -1369 
+Q 1516 -1131 1200 -813 
+Q 750 -359 506 256 
+Q 263 872 263 1534 
+Q 263 2503 741 3301 
+Q 1219 4100 1988 4444 
+L 1988 4313 
+Q 1603 4100 1356 3731 
+Q 1109 3363 987 2797 
+Q 866 2231 866 1616 
+Q 866 947 969 400 
+Q 1050 -31 1165 -292 
+Q 1281 -553 1476 -793 
+Q 1672 -1034 1988 -1253 
+z
+" transform="scale(0.015625)"/>
+       <path id="TimesNewRomanPSMT-68" d="M 1041 4444 
+L 1041 2350 
+Q 1388 2731 1591 2839 
+Q 1794 2947 1997 2947 
+Q 2241 2947 2416 2812 
+Q 2591 2678 2675 2391 
+Q 2734 2191 2734 1659 
+L 2734 647 
+Q 2734 375 2778 275 
+Q 2809 200 2884 156 
+Q 2959 113 3159 113 
+L 3159 0 
+L 1753 0 
+L 1753 113 
+L 1819 113 
+Q 2019 113 2097 173 
+Q 2175 234 2206 353 
+Q 2216 403 2216 647 
+L 2216 1659 
+Q 2216 2128 2167 2275 
+Q 2119 2422 2012 2495 
+Q 1906 2569 1756 2569 
+Q 1603 2569 1437 2487 
+Q 1272 2406 1041 2159 
+L 1041 647 
+Q 1041 353 1073 281 
+Q 1106 209 1195 161 
+Q 1284 113 1503 113 
+L 1503 0 
+L 84 0 
+L 84 113 
+Q 275 113 384 172 
+Q 447 203 484 290 
+Q 522 378 522 647 
+L 522 3238 
+Q 522 3728 498 3840 
+Q 475 3953 426 3993 
+Q 378 4034 297 4034 
+Q 231 4034 84 3984 
+L 41 4094 
+L 897 4444 
+L 1041 4444 
+z
+" transform="scale(0.015625)"/>
+       <path id="TimesNewRomanPSMT-29" d="M 144 4313 
+L 144 4444 
+Q 619 4209 934 3891 
+Q 1381 3434 1625 2820 
+Q 1869 2206 1869 1541 
+Q 1869 572 1392 -226 
+Q 916 -1025 144 -1369 
+L 144 -1253 
+Q 528 -1038 776 -670 
+Q 1025 -303 1145 264 
+Q 1266 831 1266 1447 
+Q 1266 2113 1163 2663 
+Q 1084 3094 967 3353 
+Q 850 3613 656 3853 
+Q 463 4094 144 4313 
+z
+" transform="scale(0.015625)"/>
       </defs>
       <use xlink:href="#TimesNewRomanPSMT-54"/>
       <use xlink:href="#TimesNewRomanPSMT-69" transform="translate(57.583984 0)"/>
       <use xlink:href="#TimesNewRomanPSMT-6d" transform="translate(85.367188 0)"/>
       <use xlink:href="#TimesNewRomanPSMT-65" transform="translate(163.150391 0)"/>
+      <use xlink:href="#TimesNewRomanPSMT-20" transform="translate(207.535156 0)"/>
+      <use xlink:href="#TimesNewRomanPSMT-28" transform="translate(232.535156 0)"/>
+      <use xlink:href="#TimesNewRomanPSMT-68" transform="translate(265.835938 0)"/>
+      <use xlink:href="#TimesNewRomanPSMT-29" transform="translate(315.835938 0)"/>
      </g>
     </g>
    </g>
@@ -569,7 +652,7 @@ z
      <g id="line2d_8">
       <path d="M 34.599375 227.483239 
 L 700.518011 227.483239 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_9">
       <!-- 0 -->
@@ -582,7 +665,7 @@ L 700.518011 227.483239
      <g id="line2d_9">
       <path d="M 34.599375 181.846875 
 L 700.518011 181.846875 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_10">
       <!-- 1 -->
@@ -595,7 +678,7 @@ L 700.518011 181.846875
      <g id="line2d_10">
       <path d="M 34.599375 136.210511 
 L 700.518011 136.210511 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_11">
       <!-- 2 -->
@@ -608,7 +691,7 @@ L 700.518011 136.210511
      <g id="line2d_11">
       <path d="M 34.599375 90.574148 
 L 700.518011 90.574148 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_12">
       <!-- 3 -->
@@ -621,7 +704,7 @@ L 700.518011 90.574148
      <g id="line2d_12">
       <path d="M 34.599375 44.937784 
 L 700.518011 44.937784 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #d5d9df; stroke-width: 0.6; stroke-linecap: round"/>
      </g>
      <g id="text_13">
       <!-- 4 -->
@@ -631,8 +714,8 @@ L 700.518011 44.937784
      </g>
     </g>
     <g id="text_14">
-     <!-- PV -->
-     <g style="fill: #262626" transform="translate(15.5325 139.316563) rotate(-90) scale(0.12 -0.12)">
+     <!-- PV (kW) -->
+     <g style="fill: #262626" transform="translate(15.5325 153.370625) rotate(-90) scale(0.12 -0.12)">
       <defs>
        <path id="TimesNewRomanPSMT-50" d="M 1313 1984 
 L 1313 750 
@@ -697,9 +780,104 @@ L 3238 4238
 L 4544 4238 
 z
 " transform="scale(0.015625)"/>
+       <path id="TimesNewRomanPSMT-6b" d="M 1047 4444 
+L 1047 1597 
+L 1775 2259 
+Q 2006 2472 2044 2528 
+Q 2069 2566 2069 2603 
+Q 2069 2666 2017 2711 
+Q 1966 2756 1847 2763 
+L 1847 2863 
+L 3091 2863 
+L 3091 2763 
+Q 2834 2756 2664 2684 
+Q 2494 2613 2291 2428 
+L 1556 1750 
+L 2291 822 
+Q 2597 438 2703 334 
+Q 2853 188 2966 144 
+Q 3044 113 3238 113 
+L 3238 0 
+L 1847 0 
+L 1847 113 
+Q 1966 116 2008 148 
+Q 2050 181 2050 241 
+Q 2050 313 1925 472 
+L 1047 1594 
+L 1047 644 
+Q 1047 366 1086 278 
+Q 1125 191 1197 153 
+Q 1269 116 1509 113 
+L 1509 0 
+L 53 0 
+L 53 113 
+Q 272 113 381 166 
+Q 447 200 481 272 
+Q 528 375 528 628 
+L 528 3234 
+Q 528 3731 506 3842 
+Q 484 3953 434 3995 
+Q 384 4038 303 4038 
+Q 238 4038 106 3984 
+L 53 4094 
+L 903 4444 
+L 1047 4444 
+z
+" transform="scale(0.015625)"/>
+       <path id="TimesNewRomanPSMT-57" d="M 5991 4238 
+L 5991 4122 
+Q 5825 4122 5722 4062 
+Q 5619 4003 5525 3841 
+Q 5463 3731 5328 3319 
+L 4147 -97 
+L 4022 -97 
+L 3056 2613 
+L 2097 -97 
+L 1984 -97 
+L 725 3422 
+Q 584 3816 547 3888 
+Q 484 4006 376 4064 
+Q 269 4122 84 4122 
+L 84 4238 
+L 1653 4238 
+L 1653 4122 
+L 1578 4122 
+Q 1413 4122 1325 4047 
+Q 1238 3972 1238 3866 
+Q 1238 3756 1375 3363 
+L 2209 984 
+L 2913 3006 
+L 2788 3363 
+L 2688 3647 
+Q 2622 3803 2541 3922 
+Q 2500 3981 2441 4022 
+Q 2363 4078 2284 4103 
+Q 2225 4122 2097 4122 
+L 2097 4238 
+L 3747 4238 
+L 3747 4122 
+L 3634 4122 
+Q 3459 4122 3378 4047 
+Q 3297 3972 3297 3844 
+Q 3297 3684 3438 3288 
+L 4250 984 
+L 5056 3319 
+Q 5194 3706 5194 3856 
+Q 5194 3928 5148 3990 
+Q 5103 4053 5034 4078 
+Q 4916 4122 4725 4122 
+L 4725 4238 
+L 5991 4238 
+z
+" transform="scale(0.015625)"/>
       </defs>
       <use xlink:href="#TimesNewRomanPSMT-50"/>
       <use xlink:href="#TimesNewRomanPSMT-56" transform="translate(55.615234 0)"/>
+      <use xlink:href="#TimesNewRomanPSMT-20" transform="translate(126.082031 0)"/>
+      <use xlink:href="#TimesNewRomanPSMT-28" transform="translate(151.082031 0)"/>
+      <use xlink:href="#TimesNewRomanPSMT-6b" transform="translate(184.382812 0)"/>
+      <use xlink:href="#TimesNewRomanPSMT-57" transform="translate(234.382812 0)"/>
+      <use xlink:href="#TimesNewRomanPSMT-29" transform="translate(328.767578 0)"/>
      </g>
     </g>
    </g>
@@ -805,7 +983,7 @@ L 649.228823 221.550511
 L 653.432855 227.483239 
 L 670.248982 227.483239 
 L 670.248982 227.483239 
-" clip-path="url(#p5eeb94ddb6)" style="fill: none; stroke: #ffd700; stroke-width: 1.5; stroke-linecap: round"/>
+" clip-path="url(#pd6f3254963)" style="fill: none; stroke: #ffd700; stroke-width: 1.5; stroke-linecap: round"/>
    </g>
    <g id="patch_3">
     <path d="M 34.599375 237.066875 
@@ -828,10 +1006,9 @@ L 700.518011 26.226875
 " style="fill: none; stroke: #ffffff; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="text_15">
-    <!-- PV Generation (kW) -->
-    <g style="fill: #262626" transform="translate(313.523381 16.226875) scale(0.13 -0.13)">
+    <!-- PV Generation -->
+    <g style="fill: #262626" transform="translate(328.862365 16.226875) scale(0.13 -0.13)">
      <defs>
-      <path id="TimesNewRomanPSMT-20" transform="scale(0.015625)"/>
       <path id="TimesNewRomanPSMT-47" d="M 3928 4334 
 L 4038 2997 
 L 3928 2997 
@@ -1035,130 +1212,6 @@ Q 2397 2006 2069 2444
 Q 1847 2744 1503 2744 
 z
 " transform="scale(0.015625)"/>
-      <path id="TimesNewRomanPSMT-28" d="M 1988 -1253 
-L 1988 -1369 
-Q 1516 -1131 1200 -813 
-Q 750 -359 506 256 
-Q 263 872 263 1534 
-Q 263 2503 741 3301 
-Q 1219 4100 1988 4444 
-L 1988 4313 
-Q 1603 4100 1356 3731 
-Q 1109 3363 987 2797 
-Q 866 2231 866 1616 
-Q 866 947 969 400 
-Q 1050 -31 1165 -292 
-Q 1281 -553 1476 -793 
-Q 1672 -1034 1988 -1253 
-z
-" transform="scale(0.015625)"/>
-      <path id="TimesNewRomanPSMT-6b" d="M 1047 4444 
-L 1047 1597 
-L 1775 2259 
-Q 2006 2472 2044 2528 
-Q 2069 2566 2069 2603 
-Q 2069 2666 2017 2711 
-Q 1966 2756 1847 2763 
-L 1847 2863 
-L 3091 2863 
-L 3091 2763 
-Q 2834 2756 2664 2684 
-Q 2494 2613 2291 2428 
-L 1556 1750 
-L 2291 822 
-Q 2597 438 2703 334 
-Q 2853 188 2966 144 
-Q 3044 113 3238 113 
-L 3238 0 
-L 1847 0 
-L 1847 113 
-Q 1966 116 2008 148 
-Q 2050 181 2050 241 
-Q 2050 313 1925 472 
-L 1047 1594 
-L 1047 644 
-Q 1047 366 1086 278 
-Q 1125 191 1197 153 
-Q 1269 116 1509 113 
-L 1509 0 
-L 53 0 
-L 53 113 
-Q 272 113 381 166 
-Q 447 200 481 272 
-Q 528 375 528 628 
-L 528 3234 
-Q 528 3731 506 3842 
-Q 484 3953 434 3995 
-Q 384 4038 303 4038 
-Q 238 4038 106 3984 
-L 53 4094 
-L 903 4444 
-L 1047 4444 
-z
-" transform="scale(0.015625)"/>
-      <path id="TimesNewRomanPSMT-57" d="M 5991 4238 
-L 5991 4122 
-Q 5825 4122 5722 4062 
-Q 5619 4003 5525 3841 
-Q 5463 3731 5328 3319 
-L 4147 -97 
-L 4022 -97 
-L 3056 2613 
-L 2097 -97 
-L 1984 -97 
-L 725 3422 
-Q 584 3816 547 3888 
-Q 484 4006 376 4064 
-Q 269 4122 84 4122 
-L 84 4238 
-L 1653 4238 
-L 1653 4122 
-L 1578 4122 
-Q 1413 4122 1325 4047 
-Q 1238 3972 1238 3866 
-Q 1238 3756 1375 3363 
-L 2209 984 
-L 2913 3006 
-L 2788 3363 
-L 2688 3647 
-Q 2622 3803 2541 3922 
-Q 2500 3981 2441 4022 
-Q 2363 4078 2284 4103 
-Q 2225 4122 2097 4122 
-L 2097 4238 
-L 3747 4238 
-L 3747 4122 
-L 3634 4122 
-Q 3459 4122 3378 4047 
-Q 3297 3972 3297 3844 
-Q 3297 3684 3438 3288 
-L 4250 984 
-L 5056 3319 
-Q 5194 3706 5194 3856 
-Q 5194 3928 5148 3990 
-Q 5103 4053 5034 4078 
-Q 4916 4122 4725 4122 
-L 4725 4238 
-L 5991 4238 
-z
-" transform="scale(0.015625)"/>
-      <path id="TimesNewRomanPSMT-29" d="M 144 4313 
-L 144 4444 
-Q 619 4209 934 3891 
-Q 1381 3434 1625 2820 
-Q 1869 2206 1869 1541 
-Q 1869 572 1392 -226 
-Q 916 -1025 144 -1369 
-L 144 -1253 
-Q 528 -1038 776 -670 
-Q 1025 -303 1145 264 
-Q 1266 831 1266 1447 
-Q 1266 2113 1163 2663 
-Q 1084 3094 967 3353 
-Q 850 3613 656 3853 
-Q 463 4094 144 4313 
-z
-" transform="scale(0.015625)"/>
      </defs>
      <use xlink:href="#TimesNewRomanPSMT-50"/>
      <use xlink:href="#TimesNewRomanPSMT-56" transform="translate(55.615234 0)"/>
@@ -1173,17 +1226,12 @@ z
      <use xlink:href="#TimesNewRomanPSMT-69" transform="translate(467.537109 0)"/>
      <use xlink:href="#TimesNewRomanPSMT-6f" transform="translate(495.320312 0)"/>
      <use xlink:href="#TimesNewRomanPSMT-6e" transform="translate(545.320312 0)"/>
-     <use xlink:href="#TimesNewRomanPSMT-20" transform="translate(595.320312 0)"/>
-     <use xlink:href="#TimesNewRomanPSMT-28" transform="translate(620.320312 0)"/>
-     <use xlink:href="#TimesNewRomanPSMT-6b" transform="translate(653.621094 0)"/>
-     <use xlink:href="#TimesNewRomanPSMT-57" transform="translate(703.621094 0)"/>
-     <use xlink:href="#TimesNewRomanPSMT-29" transform="translate(798.005859 0)"/>
     </g>
    </g>
   </g>
  </g>
  <defs>
-  <clipPath id="p5eeb94ddb6">
+  <clipPath id="pd6f3254963">
    <rect x="34.599375" y="26.226875" width="665.918636" height="210.84"/>
   </clipPath>
  </defs>

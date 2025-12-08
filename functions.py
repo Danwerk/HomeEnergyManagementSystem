@@ -53,6 +53,10 @@ ENERGY_COLORS = {
     "solar": "#ED7D31",
     "wind": "#70AD47",
     "price": "#A64D79",
+    'pv_mod1': '#FFD300',  # kollane
+    'pv_mod2': '#1E90FF',  # oranž
+    'pv_mod3': '#237823',  # roheline
+    'temperature': '#4287f5', #kollane
 }
 
 def academic_style():

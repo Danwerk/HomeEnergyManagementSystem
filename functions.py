@@ -12,6 +12,7 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 import seaborn as sns
 import cvxpy as cp
+from statsmodels.tsa.seasonal import STL
 
 
 IMAGES_DIR = "images/"
@@ -791,4 +792,29 @@ def optimize_storage(demand, pv, price_buy, price_sell,
         "cost": problem.value,
         "status": problem.status,
     }
+
+def decompose_series(series, period, seasonal=None):
+    kwargs = {} if seasonal is None else {"seasonal": seasonal}
+    model = STL(series, period=period, robust=True, **kwargs)
+    result = model.fit()
+
+    output = pd.DataFrame({
+        "trend": result.trend,
+        "seasonal": result.seasonal,
+        "residual": result.resid
+    }, index=series.index)
+
+    return result, output
+
+def seasonality_strength(residual: pd.Series, component: pd.Series) -> float:
+    resid_var = float(np.nanvar(residual))
+    combined_var = float(np.nanvar(residual + component))
+
+    if np.isclose(combined_var, 0.0):
+        return np.nan
+
+    strength = 1.0 - resid_var / combined_var
+    return float(np.clip(strength, 0.0, 1.0))
+
+
 

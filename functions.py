@@ -439,8 +439,8 @@ def plot_forecast(timestamp, y_true, y_pred, model_name="XGBoost", filename=None
 
     fig.update_layout(
         title=f"Forecast – {model_name}",
-        xaxis_title="Hour",
-        yaxis_title="Demand",
+        xaxis_title="Time (h)",
+        yaxis_title="Demand (kW)",
         **PLOT_STYLE
     )
 
@@ -569,7 +569,7 @@ def rolling_forecast_naive(train_df, future_df,
             "timestamp": day_data["timestamp"],
             "y_true": day_data["demand"].values,
             "y_pred": y_pred,
-            "model": "Naive (last value)",
+            "model": "Naive",
             "day": d + 1,
         })
         results.append(df_day)
@@ -609,7 +609,7 @@ def rolling_forecast_seasonal_naive(train_df, future_df,
             "timestamp": day_data["timestamp"],
             "y_true": day_data["demand"].values,
             "y_pred": np.array(preds),
-            "model": "Seasonal naive (24h)",
+            "model": "Seasonal naive",
             "day": d + 1,
         })
         results.append(df_day)

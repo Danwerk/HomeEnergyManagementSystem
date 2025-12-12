@@ -657,7 +657,7 @@ def plot_optimisation_profile(hours, demand, pv, result, title_prefix="PV_low",
         line=dict(width=2, dash="dash", color="orange")
     ), row=1, col=1)
 
-    fig.update_yaxes(title_text="Power [kW]", row=1, col=1)
+    fig.update_yaxes(title_text="Power (kW)", row=1, col=1)
 
     # Grid + Charge/Discharge
     fig.add_trace(go.Scatter(
@@ -680,7 +680,7 @@ def plot_optimisation_profile(hours, demand, pv, result, title_prefix="PV_low",
         name="Discharge", line=dict(width=1.5, dash="dash", color="red")
     ), row=2, col=1)
 
-    fig.update_yaxes(title_text="Power [kW]", row=2, col=1)
+    fig.update_yaxes(title_text="Power (kW)", row=2, col=1)
     # SOC
     fig.add_trace(go.Scatter(
         x=hours, y=result["soc"][:-1], mode="lines",
@@ -692,8 +692,8 @@ def plot_optimisation_profile(hours, demand, pv, result, title_prefix="PV_low",
         title=f"Battery optimisation profile – {title_prefix}",
         **PLOT_STYLE
     )
-    fig.update_yaxes(title_text="Energy [kWh]", row=3, col=1)
-    fig.update_xaxes(title_text="Hour", row=3, col=1)
+    fig.update_yaxes(title_text="Energy (kWh)", row=3, col=1)
+    fig.update_xaxes(title_text="Time (h)", row=3, col=1)
 
     if filename:
         save_fig_plotly(fig, filename, width=1100, height=900)
